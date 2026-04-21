@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Сайт{% endblock %}</title>
-
-    <!-- Bootstrap -->
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% block mystyles %}{% endblock %}
 </head>
 <body>
 
 <div class="container mt-5">
 
     <div class="mb-4">
-        <a href="/" class="btn btn-primary">Реєстрація</a>
-        <a href="/create-category/" class="btn btn-success">Категорії</a>
-        <a href="/categories/" class="btn btn-warning">Список категорій</a>
+        <a href="{% url 'register' %}" class="btn btn-primary">Реєстрація</a>
+        <a href="{% url 'create_category' %}" class="btn btn-success">Створення категорії</a>
+        <a href="{% url 'category_list' %}" class="btn btn-warning">Список категорій</a>
     </div>
 
     {% block content %}{% endblock %}
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
 
 </body>
 </html>

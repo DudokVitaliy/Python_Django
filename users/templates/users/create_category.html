@@ -1,23 +1,130 @@
-{% extends "users/layout.html" %}
+{% extends 'users/layout.html' %}
+{% load static %}
 
-{% block title %}Створити категорію{% endblock %}
+{% block mystyles %}
+<link href="{% static 'css/cropper.css' %}" rel="stylesheet" />
+{% endblock %}
 
 {% block content %}
-<h2>Створення категорії</h2>
+<h1 class="text-center">Додати категорію</h1>
 
-<form method="post">
+<div class="row">
+  <form class="col-md-6 offset-md-3 needs-validation" method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 
     <div class="mb-3">
-        <label class="form-label">Назва</label>
-        {{ form.name }}
+      <label for="name" class="form-label">Назва</label>
+      <input type="text" class="form-control" id="name" name="name" required />
+      <div class="valid-feedback">Looks good!</div>
+      <div class="invalid-feedback">Будь ласка, введіть назву категорії</div>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Опис</label>
-        {{ form.description }}
+      <label for="image" class="form-label" style="cursor: pointer;">
+        <img src="{% static 'images/noimage.jpg' %}" id="imgView" width="200" />
+      </label>
+      <input type="file" class="form-control d-none" id="image" accept="image/*" required name="image" />
+      <div class="invalid-feedback">Будь ласка, завантажте картинку для категорії</div>
     </div>
 
-    <button class="btn btn-success">Створити</button>
-</form>
+    <div class="form-check mb-3">
+      <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked />
+      <label for="is_active" class="form-label">Чи активна</label>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Опис</label>
+      <textarea name="description" id="description"></textarea>
+      <div class="invalid-feedback">Опис не може бути порожнім</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Додати</button>
+  </form>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Редагування фото</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img src="" id="imagePreview" width="100%" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+        <button type="button" id="btnCroppedImage" class="btn btn-primary">Зберегти</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/cropper.js' %}"></script>
+<script src="https://cdn.tiny.cloud/1/vvjvo7kl3d6bh5xriji4khj5vcgeynj3hvajabce6xamq664/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
+<script>
+tinymce.init({
+    selector: 'textarea',
+    plugins: 'lists link image table',
+    toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright | outdent indent | link image',
+});
+</script>
+
+<script>
+window.addEventListener('load', () => {
+    const imageInput = document.getElementById('image');
+    const imgView = document.getElementById('imgView');
+    const imagePreview = document.getElementById('imagePreview');
+    const btnCroppedImage = document.getElementById('btnCroppedImage');
+    const exampleModal = new bootstrap.Modal('#exampleModal');
+    let cropper;
+
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        imagePreview.src = URL.createObjectURL(file);
+        exampleModal.show();
+    });
+
+    document.getElementById('exampleModal').addEventListener('shown.bs.modal', () => {
+        cropper = new Cropper(imagePreview, { autoCropArea: 0.8 });
+    });
+
+    document.getElementById('exampleModal').addEventListener('hidden.bs.modal', () => {
+        if (cropper) cropper.destroy();
+    });
+
+    btnCroppedImage.addEventListener('click', () => {
+        if (!cropper) return;
+
+        cropper.getCroppedCanvas().toBlob(blob => {
+            const uniqueFileName = crypto.randomUUID() + '.png';
+            const file = new File([blob], uniqueFileName, { type: 'image/png' });
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            imageInput.files = dataTransfer.files;
+
+            imgView.src = URL.createObjectURL(file);
+            exampleModal.hide();
+        });
+    });
+
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', (event) => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>
 {% endblock %}

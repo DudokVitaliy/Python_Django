@@ -1,19 +1,51 @@
 {% extends "users/layout.html" %}
+{% load static %}
 
 {% block title %}Список категорій{% endblock %}
 
 {% block content %}
-<h2>Категорії</h2>
+<h2 class="mb-4">Категорії</h2>
 
-<ul class="list-group">
+<div class="row">
     {% for category in categories %}
-        <li class="list-group-item">
-            <strong>{{ category.name }}</strong><br>
-            {{ category.description }}
-        </li>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
+                {% else %}
+                    <img src="{% static 'images/noimage.jpg' %}" class="card-img-top" style="height:200px; object-fit:cover;">
+                {% endif %}
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text">{{ category.description|safe }}</p>
+
+                    {% if category.is_active %}
+                        <span class="badge bg-success">Активна</span>
+                    {% else %}
+                        <span class="badge bg-danger">Неактивна</span>
+                    {% endif %}
+
+                    <!-- Кнопка Видалити -->
+                    <form method="post" action="{% url 'delete_category' category.id %}" class="d-inline mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?');">
+                            Видалити
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
     {% empty %}
-        <li class="list-group-item">Немає категорій</li>
+        <div class="col-12">
+            <div class="alert alert-warning">
+                Немає категорій
+            </div>
+        </div>
     {% endfor %}
-</ul>
+</div>
 
 {% endblock %}
