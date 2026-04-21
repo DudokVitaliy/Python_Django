@@ -1,0 +1,23 @@
+{% extends "users/layout.html" %}
+
+{% block title %}Створити категорію{% endblock %}
+
+{% block content %}
+<h2>Створення категорії</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">Назва</label>
+        {{ form.name }}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Опис</label>
+        {{ form.description }}
+    </div>
+
+    <button class="btn btn-success">Створити</button>
+</form>
+{% endblock %}
