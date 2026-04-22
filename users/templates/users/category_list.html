@@ -27,14 +27,14 @@
                         <span class="badge bg-danger">Неактивна</span>
                     {% endif %}
 
-                    <!-- Кнопка Видалити -->
-                    <form method="post" action="{% url 'delete_category' category.id %}" class="d-inline mt-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Ви впевнені, що хочете видалити цю категорію?');">
-                            Видалити
-                        </button>
-                    </form>
+                    <a href="{% url 'edit_category' category.id %}" class="btn btn-warning btn-sm mt-2">Редагувати</a>
+
+                    <button type="button" class="btn btn-danger btn-sm mt-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteCategoryModal"
+                            data-url="{% url 'delete_category' category.id %}">
+                        Видалити
+                    </button>
 
                 </div>
             </div>
@@ -47,5 +47,38 @@
         </div>
     {% endfor %}
 </div>
+
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteCategoryModalLabel">Підтвердження видалення</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрити"></button>
+      </div>
+      <div class="modal-body">
+        Ви впевнені, що хочете видалити цю категорію?
+      </div>
+      <div class="modal-footer">
+        <form id="deleteCategoryForm" method="post" action="">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Так</button>
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var deleteModal = document.getElementById('deleteCategoryModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var url = button.getAttribute('data-url');
+        var form = deleteModal.querySelector('#deleteCategoryForm');
+        form.action = url;
+    });
+});
+</script>
 
 {% endblock %}

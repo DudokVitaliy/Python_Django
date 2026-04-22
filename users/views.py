@@ -4,7 +4,23 @@ from django.shortcuts import get_object_or_404
 
 def register(request):
     return render(request, 'users/register.html')
+def edit_category(request, id):
+    category = get_object_or_404(Category, id=id)
 
+    if request.method == 'POST':
+        category.name = request.POST.get('name')
+        category.description = request.POST.get('description')
+        category.is_active = request.POST.get('is_active') == 'on'
+
+        if request.FILES.get('image'):
+            category.image = request.FILES.get('image')
+
+        category.save()
+        return redirect('category_list')
+
+    return render(request, 'users/edit_category.html', {
+        'category': category
+    })
 
 def create_category(request):
     if request.method == 'POST':

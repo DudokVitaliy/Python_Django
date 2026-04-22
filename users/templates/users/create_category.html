@@ -140,12 +140,10 @@ window.addEventListener('load', () => {
 
     form.addEventListener('submit', (event) => {
 
-        // TinyMCE sync
         tinymce.triggerSave();
 
         let valid = form.checkValidity();
 
-        // перевірка картинки
         if (!imageInput.files.length) {
             valid = false;
             imageError.style.display = 'block';
