@@ -1,9 +1,12 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import register, create_category, category_list, delete_category, edit_category, login_view, profile_view, edit_profile
+from .views import (register, create_category, category_list,
+                    delete_category, edit_category, login_view,
+                    profile_view, edit_profile, UserRegisterAPI)
 
 urlpatterns = [
     path('', register, name='register'),
+    path('api/register/', UserRegisterAPI.as_view(), name='api_register'),
     path('login/', login_view, name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('profile/', profile_view, name='profile'),

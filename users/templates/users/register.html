@@ -6,44 +6,78 @@
 <div class="container mt-5" style="max-width: 500px;">
     <h2 class="mb-4 text-center">Реєстрація</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+    <div id="success-msg" class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
+        Користувач успішно зареєстрований!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-    <form method="POST" class="needs-validation" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+    <div id="error-msg" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+        Помилка при реєстрації.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
+    <form id="registerForm" class="needs-validation" novalidate>
         <div class="mb-3">
-            <label class="form-label fw-semibold">{{ form.username.label }}</label>
-            {{ form.username }}
-            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+            <label class="form-label fw-semibold">Логін</label>
+            <input type="text" name="username" class="form-control" placeholder="Введіть логін" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">{{ form.email.label }}</label>
-            {{ form.email }}
-            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+            <label class="form-label fw-semibold">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Введіть email" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">{{ form.password1.label }}</label>
-            {{ form.password1 }}
-            <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+            <label class="form-label fw-semibold">Пароль</label>
+            <input type="password" name="password1" class="form-control" placeholder="Введіть пароль" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">{{ form.password2.label }}</label>
-            {{ form.password2 }}
-            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+            <label class="form-label fw-semibold">Підтвердження пароля</label>
+            <input type="password" name="password2" class="form-control" placeholder="Повторіть пароль" required>
         </div>
 
         <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Зареєструватися</button>
     </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const data = {
+        username: form.username.value,
+        email: form.email.value,
+        password: form.password1.value,
+        password2: form.password2.value
+    };
+
+    try {
+        const response = await fetch("{% url 'api_register' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            document.getElementById('success-msg').style.display = 'block';
+            document.getElementById('error-msg').style.display = 'none';
+            form.reset();
+        } else {
+            const result = await response.json();
+            document.getElementById('error-msg').innerText = JSON.stringify(result);
+            document.getElementById('error-msg').style.display = 'block';
+        }
+    } catch (err) {
+        document.getElementById('error-msg').innerText = 'Помилка при відправці запиту.';
+        document.getElementById('error-msg').style.display = 'block';
+    }
+});
+</script>
 {% endblock %}

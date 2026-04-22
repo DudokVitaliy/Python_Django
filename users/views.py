@@ -6,6 +6,13 @@ from .forms import UserRegisterForm, LoginForm, CategoryForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import UserProfileForm
+from rest_framework import generics
+from .serializers import UserRegisterSerializer
+from rest_framework.permissions import AllowAny
+
+class UserRegisterAPI(generics.CreateAPIView):
+    serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
 @login_required
 def profile_view(request):
