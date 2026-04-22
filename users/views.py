@@ -3,8 +3,24 @@ from django.contrib.auth import login
 from django.contrib import messages
 from .models import Category
 from .forms import UserRegisterForm, LoginForm, CategoryForm
-from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import UserProfileForm
 
+@login_required
+def profile_view(request):
+    return render(request, 'users/profile.html', {'user': request.user})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    return render(request, 'users/edit_profile.html', {'form': form})
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
