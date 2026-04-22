@@ -1,51 +1,59 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login
+from django.contrib import messages
 from .models import Category
-from django.shortcuts import get_object_or_404
+from .forms import UserRegisterForm, LoginForm, CategoryForm
+from django.contrib.auth.forms import AuthenticationForm
 
 def register(request):
-    return render(request, 'users/register.html')
-def edit_category(request, id):
-    category = get_object_or_404(Category, id=id)
-
     if request.method == 'POST':
-        category.name = request.POST.get('name')
-        category.description = request.POST.get('description')
-        category.is_active = request.POST.get('is_active') == 'on'
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # автоматичний вхід після реєстрації
+            messages.success(request, 'Реєстрація пройшла успішно!')
+            return redirect('category_list')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'users/register.html', {'form': form})
 
-        if request.FILES.get('image'):
-            category.image = request.FILES.get('image')
-
-        category.save()
-        return redirect('category_list')
-
-    return render(request, 'users/edit_category.html', {
-        'category': category
-    })
-
-def create_category(request):
+def login_view(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        is_active = request.POST.get('is_active') == 'on'
-        image = request.FILES.get('image')
-
-        Category.objects.create(
-            name=name,
-            description=description,
-            is_active=is_active,
-            image=image
-        )
-
-        return redirect('/categories/')
-
-    return render(request, 'users/create_category.html')
-
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('category_list')
+        else:
+            messages.error(request, 'Неправильний логін або пароль')
+    else:
+        form = LoginForm()
+    return render(request, 'users/login.html', {'form': form})
 
 def category_list(request):
     categories = Category.objects.all()
-    return render(request, 'users/category_list.html', {
-        'categories': categories
-    })
+    return render(request, 'users/category_list.html', {'categories': categories})
+
+def create_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+    return render(request, 'users/create_category.html', {'form': form})
+
+def edit_category(request, id):
+    category = get_object_or_404(Category, id=id)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('category_list')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'users/edit_category.html', {'form': form, 'category': category})
 
 def delete_category(request, category_id):
     if request.method == 'POST':

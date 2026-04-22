@@ -12,9 +12,18 @@
 <div class="container mt-5">
 
     <div class="mb-4">
-        <a href="{% url 'register' %}" class="btn btn-primary">Реєстрація</a>
-        <a href="{% url 'create_category' %}" class="btn btn-success">Створення категорії</a>
-        <a href="{% url 'category_list' %}" class="btn btn-warning">Список категорій</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'create_category' %}" class="btn btn-success">Створення категорії</a>
+            <a href="{% url 'category_list' %}" class="btn btn-warning">Список категорій</a>
+
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Вихід</button>
+            </form>
+        {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary">Реєстрація</a>
+            <a href="{% url 'login' %}" class="btn btn-success">Логін</a>
+        {% endif %}
     </div>
 
     {% block content %}{% endblock %}
