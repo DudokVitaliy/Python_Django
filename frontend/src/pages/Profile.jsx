@@ -51,7 +51,7 @@ export default function Profile() {
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1>👤 Профіль користувача</h1>
+        <h1>Профіль користувача</h1>
 
         <div style={styles.infoBox}>
           <p>
