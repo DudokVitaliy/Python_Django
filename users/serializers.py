@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import User
 from django.contrib.auth.password_validation import validate_password
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -8,7 +8,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'password2']
+        fields = ['username', 'email', 'password', 'password2', 'avatar']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -16,10 +16,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        user = User.objects.create(
+        validated_data.pop('password2')  # 🔥 обов’язково!
+
+        user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
+            password=validated_data['password'],
+            avatar=validated_data.get('avatar')  # 🔥 ось тут файл
         )
-        user.set_password(validated_data['password'])
-        user.save()
+
         return user

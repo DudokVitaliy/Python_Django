@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
     'users',
     'widget_tweaks',
     'rest_framework',
@@ -123,10 +125,11 @@ STATICFILES_DIRS = [
     str(BASE_DIR / 'static'),
 ]
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@example.com'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'category_list'
 LOGOUT_REDIRECT_URL = 'login'
+AUTH_USER_MODEL = 'users.User'
 

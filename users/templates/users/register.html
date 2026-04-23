@@ -6,38 +6,40 @@
 <div class="container mt-5" style="max-width: 500px;">
     <h2 class="mb-4 text-center">Реєстрація</h2>
 
-    <div id="success-msg" class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
+    <div id="success-msg" class="alert alert-success" style="display:none;">
         Користувач успішно зареєстрований!
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div id="error-msg" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
-        Помилка при реєстрації.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <div id="error-msg" class="alert alert-danger" style="display:none;"></div>
+    
+    <form id="registerForm" enctype="multipart/form-data">
 
-    <form id="registerForm" class="needs-validation" novalidate>
         <div class="mb-3">
-            <label class="form-label fw-semibold">Логін</label>
-            <input type="text" name="username" class="form-control" placeholder="Введіть логін" required>
+            <label class="form-label">Логін</label>
+            <input type="text" name="username" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Email</label>
-            <input type="email" name="email" class="form-control" placeholder="Введіть email" required>
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Пароль</label>
-            <input type="password" name="password1" class="form-control" placeholder="Введіть пароль" required>
+            <label class="form-label">Пароль</label>
+            <input type="password" name="password1" class="form-control" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-semibold">Підтвердження пароля</label>
-            <input type="password" name="password2" class="form-control" placeholder="Повторіть пароль" required>
+            <label class="form-label">Підтвердження пароля</label>
+            <input type="password" name="password2" class="form-control" required>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Зареєструватися</button>
+        <div class="mb-3">
+            <label class="form-label">Аватар</label>
+            <input type="file" name="avatar" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Зареєструватися</button>
     </form>
 </div>
 {% endblock %}
@@ -48,21 +50,25 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     e.preventDefault();
 
     const form = e.target;
-    const data = {
-        username: form.username.value,
-        email: form.email.value,
-        password: form.password1.value,
-        password2: form.password2.value
-    };
+
+    const formData = new FormData();
+
+    formData.append('username', form.username.value);
+    formData.append('email', form.email.value);
+    formData.append('password', form.password1.value);
+
+    // файл
+    if (form.avatar.files.length > 0) {
+        formData.append('avatar', form.avatar.files[0]);
+    }
 
     try {
         const response = await fetch("{% url 'api_register' %}", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "X-CSRFToken": "{{ csrf_token }}"
             },
-            body: JSON.stringify(data)
+            body: formData
         });
 
         if (response.ok) {

@@ -2,18 +2,34 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib import messages
 from .models import Category
-from .forms import UserRegisterForm, LoginForm, CategoryForm
+from .forms import LoginForm, CategoryForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import UserProfileForm
 from rest_framework import generics
 from .serializers import UserRegisterSerializer
 from rest_framework.permissions import AllowAny
+from .forms import CustomUserCreationForm
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class UserRegisterAPI(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
+    parser_classes = (MultiPartParser, FormParser)
 
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Реєстрація пройшла успішно!')
+            return redirect('category_list')
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'users/register.html', {'form': form})
 @login_required
 def profile_view(request):
     return render(request, 'users/profile.html', {'user': request.user})
@@ -28,17 +44,6 @@ def edit_profile(request):
     else:
         form = UserProfileForm(instance=request.user)
     return render(request, 'users/edit_profile.html', {'form': form})
-def register(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # автоматичний вхід після реєстрації
-            messages.success(request, 'Реєстрація пройшла успішно!')
-            return redirect('category_list')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
