@@ -3,10 +3,14 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Swagger
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -22,10 +26,11 @@ urlpatterns = [
     path('', include('users.urls')),
     path('admin/', admin.site.urls),
 
-    # Swagger UI
+    path('api/login/', TokenObtainPairView.as_view(), name='api_login'),
+    path('api/refresh/', TokenRefreshView.as_view(), name='api_refresh'),
+
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc'),
 ]
 
-# Media files (avatars, images)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -11,14 +11,35 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import UserRegisterSerializer
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    user = request.user
+    return Response({
+        "username": user.username,
+        "email": user.email
+    })
 class UserRegisterAPI(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
     parser_classes = (MultiPartParser, FormParser)
 
+class ProfileAPI(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user
+        return Response({
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+        })
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
