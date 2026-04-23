@@ -3,6 +3,7 @@ from django.db import models
 
 class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()

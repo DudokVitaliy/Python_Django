@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import login
 from django.contrib import messages
 from .models import Category
@@ -6,11 +6,12 @@ from .forms import LoginForm, CategoryForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import UserProfileForm
-from rest_framework import generics
-from .serializers import UserRegisterSerializer
-from rest_framework.permissions import AllowAny
 from .forms import CustomUserCreationForm
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
+from .serializers import UserRegisterSerializer
+
 
 class UserRegisterAPI(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
