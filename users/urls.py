@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 from .views import (register, create_category, category_list,
                     delete_category, edit_category, login_view,
                     profile_view, edit_profile, UserRegisterAPI, ProfileAPI,
-                    password_reset_api, PasswordResetConfirmAPI)
+                    password_reset_api, PasswordResetConfirmAPI, google_login, profile)
 
 urlpatterns = [
     path('', register, name='register'),
@@ -30,4 +30,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='users/password_reset_confirm.html'), name='password_reset_confirm'),
 
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'), name='password_reset_complete'),
+
+    path("google-login/", google_login),
+    path("profile/", profile),
 ]

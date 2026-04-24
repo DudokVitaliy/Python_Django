@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import login
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
@@ -8,17 +8,84 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Category
 from .forms import LoginForm, CategoryForm, UserProfileForm, CustomUserCreationForm
 from .serializers import UserRegisterSerializer
-
+import requests
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
 RESET_TOKENS = {}
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    user = request.user
+
+    return Response({
+        "username": user.username,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+    })
+
+@api_view(["POST"])
+def google_login(request):
+    access_token = request.data.get("access_token")
+
+    if not access_token:
+        return Response(
+            {"error": "No access token provided"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    google_request = requests.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+
+    if google_request.status_code != 200:
+        return Response(
+            {"error": "Invalid Google token"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    data = google_request.json()
+
+    email = data.get("email")
+    first_name = data.get("given_name", "")
+    last_name = data.get("family_name", "")
+
+    if not email:
+        return Response(
+            {"error": "Google account has no email"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": email,
+            "first_name": first_name,
+            "last_name": last_name,
+        }
+    )
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "refresh": str(refresh),
+        "access": str(refresh.access_token),
+        "user": {
+            "email": user.email,
+            "username": user.username
+        }
+    })
 @api_view(['POST'])
 def password_reset_api(request):
     email = request.data.get('email')
@@ -37,7 +104,7 @@ def password_reset_api(request):
         send_mail(
             "Reset password",
             f"Click here: {reset_link}",
-            "admin@test.com",  # Заміни на свій email
+            "dudok405@gmail.com",
             [email],
             fail_silently=False,
         )
