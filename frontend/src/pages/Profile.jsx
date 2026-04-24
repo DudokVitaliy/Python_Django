@@ -22,12 +22,23 @@ export default function Profile() {
         },
       })
       .then((res) => {
+        console.log("PROFILE DATA:", res.data);
+
         setUser(res.data);
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
-        setError("Не вдалося завантажити профіль");
+        console.log("PROFILE ERROR:", err.response?.status);
+        console.log("DETAIL:", err.response?.data);
+
+        if (err.response?.status === 401) {
+          setError("Токен недійсний або протермінований");
+        } else if (err.response?.status === 404) {
+          setError("API /profile/ не знайдено");
+        } else {
+          setError("Не вдалося завантажити профіль");
+        }
+
         setLoading(false);
       });
   }, []);
@@ -43,7 +54,16 @@ export default function Profile() {
   if (error) {
     return (
       <div style={styles.center}>
-        <p style={{ color: "red" }}>{error}</p>
+        <div>
+          <p style={{ color: "red" }}>{error}</p>
+
+          <button
+            onClick={() => window.location.href = "/"}
+            style={styles.button}
+          >
+            Увійти знову
+          </button>
+        </div>
       </div>
     );
   }
@@ -54,21 +74,10 @@ export default function Profile() {
         <h1>Профіль користувача</h1>
 
         <div style={styles.infoBox}>
-          <p>
-            <b>Username:</b> {user.username}
-          </p>
-
-          <p>
-            <b>Email:</b> {user.email}
-          </p>
-
-          <p>
-            <b>Ім’я:</b> {user.first_name || "—"}
-          </p>
-
-          <p>
-            <b>Прізвище:</b> {user.last_name || "—"}
-          </p>
+          <p><b>Username:</b> {user?.username}</p>
+          <p><b>Email:</b> {user?.email}</p>
+          <p><b>Ім’я:</b> {user?.first_name || "—"}</p>
+          <p><b>Прізвище:</b> {user?.last_name || "—"}</p>
         </div>
       </div>
     </div>
@@ -101,5 +110,15 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "80vh",
+    flexDirection: "column",
+    gap: "10px"
   },
+  button: {
+    padding: "8px 12px",
+    borderRadius: "6px",
+    border: "none",
+    background: "#667eea",
+    color: "white",
+    cursor: "pointer"
+  }
 };
