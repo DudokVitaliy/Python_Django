@@ -23,8 +23,9 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('', include('users.urls')),
     path('admin/', admin.site.urls),
+
+    path('', include('users.urls')),
 
     path('api/login/', TokenObtainPairView.as_view(), name='api_login'),
     path('api/refresh/', TokenRefreshView.as_view(), name='api_refresh'),

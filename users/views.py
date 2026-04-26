@@ -8,8 +8,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Category
+from rest_framework.permissions import AllowAny
 from .forms import LoginForm, CategoryForm, UserProfileForm, CustomUserCreationForm
 from .serializers import UserRegisterSerializer
 import requests
@@ -17,22 +16,24 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Category
+
+from django.shortcuts import render
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import AllowAny
+from .serializers import CategorySerializer
+from .models import Category
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+
 
 RESET_TOKENS = {}
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def profile(request):
-    user = request.user
-
-    return Response({
-        "username": user.username,
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-    })
 
 @api_view(["POST"])
 def google_login(request):
